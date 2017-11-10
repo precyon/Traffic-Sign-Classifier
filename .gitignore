@@ -4,3 +4,7 @@ data
 models
 *.swp
 *.p
+commit.bat
+*_template.md
+literature
+__pycache__
