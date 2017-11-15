@@ -13,23 +13,20 @@ The goals / steps of this project are the following:
 * Analyze the softmax probabilities of the new images
 * Summarize the results with a written report
  
-
----
 ### Project files
-
 
 The project page is on [Github](https://github.com/pvishal-carnd/Traffic-Sign-Classifier). This writeup can at [writeup.md](writeup.md) and the Jupyter notebook, that has all the code can be accessed at [Traffic_Sign_Classifier.ipynb](Traffic_Sign_Classifier.ipynb). 
 
 ### Data Set Summary & Exploration
-
+---
 The dataset exploration was done primarily with `numpy`. `pandas` was used to read in the `csv` file with sign descriptions. The training, validation and test set has already been provided. The following list shows a summary.   
 
 
-* The size of training set is 34799
-* The size of the validation set is 4410
-* The size of test set is 12630
-* The shape of a traffic sign image is 32x32
-* The number of unique classes/labels in the data set is 43
+* The size of training set is `34799`
+* The size of the validation set is `4410`
+* The size of test set is `12630`
+* The shape of a traffic sign image is `32x32`
+* The number of unique classes/labels in the data set is `43`
 
 ##### Visualization of the dataset.
 
@@ -118,51 +115,73 @@ We apply this augmentation mostly only to the under-represented classes to bring
 
 ![Augmented histogram](doc-images/augmented-histogram.png)
 
-### Design and Test a Model Architecture
-
-The final model architecture is as shown the the following figure. This figure has been generated through Tensorboard. The table that follows the model shows the parameters of each layer.
+### The Model Architecture
+---
+The final model architecture is as shown the the following figure. This figure has been generated through `Tensorboard`. The table that follows the model shows the parameters of each layer.
 
 ![Model architecture](doc-images/model-arch-tf.png)
 
-| Layer         		|     Description	        					| 
-|:---------------------:|:---------------------------------------------:| 
-| Input         		| 32x32x3 RGB image   							|
-| Convolution 3x3     	| 1x1 stride, same padding, outputs 32x32x64 	|
-| RELU					|												|
-| Max pooling	      	| 2x2 stride,  outputs 16x16x64 				|
-| Convolution 3x3	    | etc.      									|
-| Fully connected		| etc.        									|
-| Softmax				| etc.        									|
 
+| Name      | Layer         		|     Description	        					| 
+|:---------:|:---------------------:|:---------------------------------------------:| 
+| Input     | Input         		| 32x32x1 grayscale image						|
+| CONV1     | Convolution 5x5     	| 1x1 stride, same padding, Outputs 32x32x16 	|
+| .       	| Max Pooling 2x2       | Output 16x16x16                               |
+| CONV2     | Convolution 5x5		| 1x1 stride, same padding, Outputs 16x16x32 	|
+| .         | Max Pool 2x2          | Output 8x8x16                                 |
+| MaxPool   | Max pooling 2x2       | Applied on CONV1, 2x2 stride, Outputs 16x16x16|
+| flatten   | Fully connected       | Fully connected layer, 3072 units             |
+| dropout1  | Dropout       		| Keep probabilty of 0.4                        |
+| FC1       | Fully connected       | Fully connected layer, 1024 units             |
+| dropout2  | Dropout				| Keep probabilty of 0.4                        |
+| FC2       | Fully connected       | Fully connected layer, 43 units               |
+
+
+Our model has 5 layers - 2 convolutional layers for feature extraction and 3 fully connected layer for classification. The architecture is based on the LeNet-5 model from the [LeNet MNIST lab](https://github.com/udacity/CarND-LeNet-Lab). As in most convolutional neural network models, the number of filters increase in the deeper convolutional layers and the image sizes decrease. Unlike the LeNet-5 model above, we use same padding instead of valid padding. In case of valid padding, features around the edges get less importance. This could reduce performance as our images, certainly not the augmented ones, are not guaranteed to be centered well. 
  
+Another highlight of the model is that is it uses multi-scale features for classification as proposed in this paper by Pierre Sermanet and Yann LeCunn. This is achieved by feeding in the output of both the convolutional layers to the classifier. It is easy to see this in the architecture diagram above - the output of `CONV1` is also max-pooled and fed into the fully-connected `flatten` layer. An addition max-pooling is done so that the features of the `CONV1` layer are weighed in similarly to that of `CONV2`. 
 
+### Training and hyperparameters
 
-#### Model training and hyperparameters
+Our final choice of training hyperparameters is as follows:
+```
+learning_rate = 0.002
+BATCH_SIZE    = 128
+EPOCHS        = 50
+L2_REG        = 0.0
+keep_prob1    = 0.4
+keep_prob2    = 0.4
+```
 
-To train the model, I used an ....
+The model was trained using the Adam optimizer. It clearly performed better than the Stocastic Gradient Descent and very often better than RMSProp.
 
-#### Model performance
-
-My final model results were:
-* training set accuracy of ?
-* validation set accuracy of ? 
-* test set accuracy of ?
+#### Regularization
+Adding regularization was one of the first modifications we made to the default LeNet-5 model. A later section describes our iterations on the regularization parameters.
+- Dropout. We added dropout layers to all the fully-connected layers in the model. Dropout is not usually used in the convolutional layers and we mostly stuck to this using our iterations. 
+- L2-regularization. Again, L2-regularization was added only to the weights in the fully-connected layers. The loss function from the prediction errors was augmented with L2-norm of the layer weights, scaled with a hyperparameter. While L2-regularization have us significant benefits in reducing overfitting, we set it to zero in favour of dropout as our validation accuracy approached closer to the training accuracy.    
 
 #### Development history
 
-If an iterative approach was chosen:
-* What was the first architecture that was tried and why was it chosen?
-* What were some problems with the initial architecture?
-* How was the architecture adjusted and why was it adjusted? Typical adjustments could include choosing a different model architecture, adding or taking away layers (pooling, dropout, convolution, etc), using an activation function or changing the activation function. One common justification for adjusting an architecture would be due to overfitting or underfitting. A high accuracy on the training set but low accuracy on the validation set indicates over fitting; a low accuracy on both sets indicates under fitting.
-* Which parameters were tuned? How were they adjusted and why?
-* What are some of the important design choices and why were they chosen? For example, why might a convolution layer work well with this problem? How might a dropout layer help with creating a successful model?
+Since the number of iterations we large, we present only a few important changes to the model and the hyper-parameters that we took towards our target validation accuracy 
 
-If a well known architecture was chosen:
-* What architecture was chosen?
-* Why did you believe it would be relevant to the traffic sign application?
-* How does the final model's accuracy on the training, validation and test set provide evidence that the model is working well?
+1. The starting LeNet-5 model from the [LeNet MNIST lab](https://github.com/udacity/CarND-LeNet-Lab) gave us an accuracy of around 87%. Changing the number of epochs, learning rates and batch sizes did not a significant increase in accuracy. 
+2. Implemented data normalization and conversion to grayscale. This improved the validation accuracy to over 90%. Most of the gains were due to normalization but it was decided to stick with the grayscale conversion anyway. More about this aspect in a later section.
+3. The model mostly overfit the training set. Training set accuracy has always been around 98% to 100%. To help solve this, dropout layers were added to all the fully-connected layers. L2 regularization was also added and tuned. This helped the difference to reduce and it improved the validation accuracy to around 92%. 
+4. Data augmentation pipeline was implemented. Number of layers and filters were tuned further to try and reduce the overfit with additional nodes. This helped achieve a target and take the validation accuracy to beyond 93%.   
+5. The multi-scale LeNet architecture was implemented by connecting the first convolution layer to the fully-connected layer. After tuning the number of filters in each layer and nodes in the classification layers, the final performance numbers were achieved. Removing L2 regularization gave better validation accuracy numbers and hence it was disabled.      
+
+### Model performance
+
+The final model results were as follows:
+* Training set accuracy of `100%`
+* Validation set accuracy of `96.6%`
+* Test set accuracy of `94.1%`
+
+It is not surprising that the accuracy with test set is less than that of the validation set. The model was being continuously tuned with a goal of reducing the validation error. This causes the validation set to indirectly creep into our model training leading to a high accuracy.
+
+Overall, the model still overfits the dataset while surpassing our target on validation accuracy. Later sections address how the performance could be improved. 
  
-
+ 
 ### Test a Model on New Images
 
 ##### Choose five German traffic signs found on the web and provide them in the report. For each image, discuss what quality or qualities might be difficult to classify.
