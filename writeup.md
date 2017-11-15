@@ -12,11 +12,7 @@ The goals / steps of this project are the following:
 * Use the model to make predictions on new images
 * Analyze the softmax probabilities of the new images
 * Summarize the results with a written report
-
-
-## Rubric Points
-
-Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/481/view) individually and describe how I addressed each point in my implementation.  
+ 
 
 ---
 ### Project files
@@ -39,11 +35,11 @@ The dataset exploration was done primarily with `numpy`. `pandas` was used to re
 
 Each image is a 32x32x3 RGB array with integer values in the range `[0 255]'. We plot a random images of a few classes to see how they look like. 
 
-![Sample Images][doc-images/datavis.png]
+![Sample Images](doc-images/datavis.png)
 
 Next, we plot the histogram of the number of images for each class.
 
-![Data histograms][doc-images/data-histograms.png]
+![Data histograms](doc-images/data-histograms.png)
 
 From the shapes of each of the three distributions,  the validation and the test datasets, at least at the outset do seem to be drawn from the same distribution. However, the dataset is unbalanced. Certain classes are significantly under-represented with respect to the number of available samples in the training set. We will keep an eye out for these classes when we analyze the prediction model performance at a later stage.  
 
@@ -53,8 +49,9 @@ As a first step of the preprocessing pipeline, the images were converted to gray
 
 After grayscaling, the images were normalized. We did this by linearly mapping all the pixel values to lie between `0` and `1`. Apart from helping the learning by keeping the means small and the cost function well distributed along all axes, this normalization steps also helps make the algorithm invariant to brightness changes. The image histograms become flatter and this helps bring up faint features. However, this method fails to work under cases where parts of the image are overexposed (perhaps due to the sky in the background). Local adaptive histogram equalization, local normalization or applying a non-linear transformation like gamma correction can potentially help such cases. We, nevertheless, continued with our simple min-max normalization scheme and the results are as follows:   
 
-![Preprocessing results][doc-images/preproc.png]
+![Preprocessing results](doc-images/preproc.png)
 
+The result are as expected. The variation in the brightnesses of has been reduced and the darker features have been brought up. Also as expected, our simplistic linear normalization scheme has a very little effect on signs that have sky in the background.   
 
 ### Data augmentation
 
@@ -115,45 +112,43 @@ augPipeline = iaa.Sequential([
 ```
 The results of this pipeline are shown for a single randomly selected image.
 
-![Augmentation pipeline test][doc-images/augmented.png]
+![Augmentation pipeline test](doc-images/augmented.png)
 
-We apply this augmentation mostly only to the underrepresented classes to bring up each of their sample size to about 1500 images per class. We confirm this by looking at the histogram for the augmented dataset.
+We apply this augmentation mostly only to the under-represented classes to bring up each of their sample size to about 1500 images per class. We confirm this by looking at the histogram of the augmented dataset.
 
-
-![Augmented histogram][doc-images/augmented-hist.png]
+![Augmented histogram](doc-images/augmented-histogram.png)
 
 ### Design and Test a Model Architecture
 
+The final model architecture is as shown the the following figure. This figure has been generated through Tensorboard. The table that follows the model shows the parameters of each layer.
 
-
-##### Describe what your final model architecture looks like including model type, layers, layer sizes, connectivity, etc.) Consider including a diagram and/or table describing the final model.
-
-My final model consisted of the following layers:
+![Model architecture](doc-images/model-arch-tf.png)
 
 | Layer         		|     Description	        					| 
 |:---------------------:|:---------------------------------------------:| 
-| Input         		| 32x32x3 RGB image   							| 
+| Input         		| 32x32x3 RGB image   							|
 | Convolution 3x3     	| 1x1 stride, same padding, outputs 32x32x64 	|
 | RELU					|												|
 | Max pooling	      	| 2x2 stride,  outputs 16x16x64 				|
 | Convolution 3x3	    | etc.      									|
 | Fully connected		| etc.        									|
 | Softmax				| etc.        									|
-|						|												|
-|						|												|
+
  
 
 
-##### Describe how you trained your model. The discussion can include the type of optimizer, the batch size, number of epochs and any hyperparameters such as learning rate.
+#### Model training and hyperparameters
 
 To train the model, I used an ....
 
-##### Describe the approach taken for finding a solution and getting the validation set accuracy to be at least 0.93. Include in the discussion the results on the training, validation and test sets and where in the code these were calculated. Your approach may have been an iterative process, in which case, outline the steps you took to get to the final solution and why you chose those steps. Perhaps your solution involved an already well known implementation or architecture. In this case, discuss why you think the architecture is suitable for the current problem.
+#### Model performance
 
 My final model results were:
 * training set accuracy of ?
 * validation set accuracy of ? 
 * test set accuracy of ?
+
+#### Development history
 
 If an iterative approach was chosen:
 * What was the first architecture that was tried and why was it chosen?
