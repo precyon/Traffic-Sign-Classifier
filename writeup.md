@@ -170,6 +170,14 @@ Since the number of iterations we large, we present only a few important changes
 4. Data augmentation pipeline was implemented. Number of layers and filters were tuned further to try and reduce the overfit with additional nodes. This helped achieve a target and take the validation accuracy to beyond 93%.   
 5. The multi-scale LeNet architecture was implemented by connecting the first convolution layer to the fully-connected layer. After tuning the number of filters in each layer and nodes in the classification layers, the final performance numbers were achieved. Removing L2 regularization gave better validation accuracy numbers and hence it was disabled.      
 
+To help us during our iterations, we computed the performance of each class. Accuracy, precision, recall and F-score were computed for each class and mis-classified images studied to help choose appropriate augmentation transformations and normalization steps. Following conclusions were made:
+
+1. There were some classes that had a very small number of training images compared to others. Rather unintuitively, precision and recall numbers were not exactly correlated to this fact. Baring a few, most of the classes of signs with low sample sizes did fairly well on our benchmarking numbers. Of course, this fact can not be generalized and depends heavily on the distribution and variation in the images in our three sets.
+2. Analyzing precision and recall helped decide on grayscale conversion as a normalization step. The following plot shows a plot of our benchmarking numbers for all the classes. Clearly `16` stands out. Analysis of the mis-classified images showed that this sign comes in 2 variants - one of which does not have a red border. Further analysis of random images from the training showed that this variety is not very well represented in the training set and this could be a cause for the errors. While the correct step here would have been to shuffle the three datasets well, we decided to convert the images to grayscale. This improved the performance of our model on this sign (although not overall because the dataset has very low number of such signs). The final class-wise performance is shown in the next section.
+
+This analysis also helped us discover more reasons for mis-classification like partial occulsion, over-exposure, bad resolution - the examples of which are far too many to show here. Many of these can potentially be solved by better normalization and data augmentation.
+
+
 ### Model performance
 
 The final model results were as follows:
@@ -180,8 +188,12 @@ The final model results were as follows:
 It is not surprising that the accuracy with test set is less than that of the validation set. The model was being continuously tuned with a goal of reducing the validation error. This causes the validation set to indirectly creep into our model training leading to a high accuracy.
 
 Overall, the model still overfits the dataset while surpassing our target on validation accuracy. Later sections address how the performance could be improved. 
+
+The class wise performance of our model on the validation set is shown below.
  
- 
+
+
+
 ### Test a Model on New Images
 
 ##### Choose five German traffic signs found on the web and provide them in the report. For each image, discuss what quality or qualities might be difficult to classify.
