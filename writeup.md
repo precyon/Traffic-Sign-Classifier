@@ -1,6 +1,8 @@
 # **Building a Traffic Sign Classifier** 
 
 
+Table of contents
+
 The goals / steps of this project are the following:
 * Load the data set (see below for links to the project data set)
 * Explore, summarize and visualize the data set
@@ -182,7 +184,7 @@ Adding regularization was one of the first modifications we made to the default 
 - Dropout. We added dropout layers to all the fully-connected layers in the model. Dropout is not usually used in the convolutional layers and we mostly stuck to this using our iterations. 
 - L2-regularization. Again, L2-regularization was added only to the weights in the fully-connected layers. The loss function from the prediction errors was augmented with L2-norm of the layer weights, scaled with a tunable hyperparameter. While L2-regularization gave us significant benefits in reducing overfitting initially, we set it to zero in favor of dropout as our validation accuracy approached closer to the training accuracy.    
 
-#### Development history
+### Development history
 
 Since the number of iterations in the model development were large, we present only a few important changes to the model and the hyper-parameters that we took towards our target validation accuracy 
 
@@ -211,7 +213,8 @@ This analysis also helped us discover more reasons for misclassification like pa
 
 A similar analysis could also have been done by plotting the confusion matrix.
 
-### Model performance
+### Model performance and testing
+---
 
 The final model results were as follows:
 * Training set accuracy of `99.94%`
@@ -227,7 +230,7 @@ The class wise performance of our model on the validation set is shown below.
 ![Class-wise performance](./doc-images/classwise-final.png) 
 
 
-### Field testing on new images
+#### Field testing on new images
 
 To simulate field testing, we tested our model on 8 new traffic sign images gathered from the internet. The images and their labels are shown below.
 
@@ -259,6 +262,7 @@ Since the number of images taken here is so small, analysis of precision and rec
 For the images that we have chosen, the model is quite certain of the predictions it made - even they are incorrect. For the image with two signs on it, neither of the signs come close in magnitude to the (incorrect) prediction that it made. 
 
 ### Visualizing the Neural Network
+---
 
 As a last step of the project, we try visualize the activations of our model for two images. One of them is a clear true negative - image of a mountain and other one is a an image that our model classified well. The images are shown below.
 
