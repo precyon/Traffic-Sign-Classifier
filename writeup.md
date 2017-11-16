@@ -119,7 +119,10 @@ Like we mentioned before, we apply this augmentation mostly only to the under-re
 
 ### The Model Architecture
 ---
-The final model architecture is as shown the the following figure. This figure has been generated through `Tensorboard`. The table that follows the model shows the parameters of each layer.
+
+Two models deserve attention here:
+
+**Multiscale LeNet**. The final model architecture is as shown the the following figure. This figure has been generated through `Tensorboard`. The table that follows the model shows the parameters of each layer.
 
 ![Model architecture](doc-images/model-arch-tf.png)
 
@@ -141,7 +144,28 @@ The final model architecture is as shown the the following figure. This figure h
 
 Our model has 5 layers: 2 convolutional layers for feature extraction and 3 fully connected layer for classification. The architecture is based on the LeNet-5 model from the [LeNet MNIST lab](https://github.com/udacity/CarND-LeNet-Lab). As in most convolutional neural network models, the number of filters increase in the deeper convolutional layers and the image sizes decrease. Unlike the LeNet-5 model above, we use same padding instead of valid padding. In case of valid padding, features around the edges get less importance. This could reduce performance as our images are not guaranteed to be centered well. It could probably be more beneficial to keep the sizes same after convolutions and use max-pooling layers for size reductions.
  
-Another highlight of the model is that is it uses multi-scale features for classification as proposed in this [paper](http://yann.lecun.com/exdb/publis/pdf/sermanet-ijcnn-11.pdf) by Pierre Sermanet and Yann LeCunn. This is achieved by feeding in the output of both the convolutional layers to the classifier. It is easy to see this in the architecture diagram above - the output of `CONV1` is also max-pooled and fed into the fully-connected `flatten` layer. An addition max-pooling is done so that the features of the `CONV1` layer are weighed in similarly to that of `CONV2`. 
+Another highlight of the model is that is it uses multi-scale features for classification as proposed in this [paper](http://yann.lecun.com/exdb/publis/pdf/sermanet-ijcnn-11.pdf) by Pierre Sermanet and Yann LeCunn. This is achieved by feeding in the output of both the convolutional layers to the classifier. It is easy to see this in the architecture diagram above - the output of `CONV1` is also max-pooled and fed into the fully-connected `flatten` layer. An addition max-pooling is done so that the features of the `CONV1` layer are weighed in similarly to that of `CONV2`.
+
+All layer activations in this model were performed with a ReLU. 
+
+**LeNet + fully connected layer**. This architecture is a much simpler one with only one extra fully-connected layer to the default LeNet model that we started with. Being smaller, this model is much quicker to train and achieved the validation accuracy requirements of this project. The specifics of the model are as below:
+
+| Name      | Layer         		|     Description	        					| 
+|:---------:|:---------------------:|:---------------------------------------------:| 
+| Input     | Input         		| 32x32x1 grayscale image						|
+| CONV1     | Convolution 5x5     	| 1x1 stride, valid padding, Outputs 28x28x6 	|
+| .       	| Max Pooling 2x2       | Output 14x14x6                                |
+| CONV2     | Convolution 5x5		| 1x1 stride, valid padding, Outputs 10x10x16 	|
+| .         | Max Pool 2x2          | Output 5x5x16                                 |
+| flatten   | Fully connected       | Fully connected layer, 400 units              |
+| dropout1  | Dropout       		| Keep probabilty of 0.4                        |
+| FC1       | Fully connected       | Fully connected layer, 300 units              |
+| dropout2  | Dropout				| Keep probabilty of 0.4                        |
+| FC2       | Fully connected       | Fully connected layer, 100 units              |
+| dropout3  | Dropout				| Keep probabilty of 0.4                        |
+| FC2       | Fully connected       | Fully connected layer, 43 units               |
+ 
+All layer activations were performed with a ReLU. 
 
 ### Training and hyperparameters
 
@@ -169,14 +193,15 @@ Since the number of iterations in the model development we large, we present onl
 1. The starting LeNet-5 model from the [LeNet MNIST lab](https://github.com/udacity/CarND-LeNet-Lab) gave us an accuracy of around 87%. Changing the number of epochs, learning rates and batch sizes did not significantly increase the accuracy. 
 2. Implemented data normalization and conversion to grayscale. This improved the validation accuracy to over 90%. Most of the gains were due to normalization but it was decided to stick with the grayscale conversion anyway. More about this aspect in a later section.
 3. The model mostly overfit the training set. Training set accuracy has always been around 98% to 100%. To help solve this, dropout layers were added to all the fully-connected layers. L2 regularization was also added and tuned. This helped the difference to reduce and it improved the validation accuracy to around 92%. 
-4. Data augmentation pipeline was implemented. Number of layers and filters were tuned further to try and reduce the overfit with additional nodes. This helped achieve a target and take the validation accuracy to beyond 93%.   
-5. The multi-scale LeNet architecture was implemented by connecting the first convolution layer to the fully-connected layer. After tuning the number of filters in each layer and nodes in the classification layers, the final performance numbers were achieved. Removing L2 regularization gave better validation accuracy numbers and hence it was disabled.      
+4. Another fully-connected layer was added after the convolution layers. This model is the second one mentioned in the [Model Architectures section](#the-model-architecture). With some hyperparameter tuning, it was this architecture helped us achieve the target accuracy of 93% and occasionally even high as 95%. Further steps in improving the model/architecture are mostly with the intent of learning.
+5. Data augmentation pipeline was implemented. Number of layers and filters were tuned further to try and reduce the overfit with additional nodes. This helped achieve a target and take the validation accuracy to well beyond 93%.   
+6. The multi-scale LeNet architecture was implemented by connecting the first convolution layer to the fully-connected layer. After tuning the number of filters in each layer and nodes in the classification layers, the final performance numbers were achieved. Removing L2 regularization gave better validation accuracy numbers and hence it was disabled.      
 
 To help us during our iterations, we computed the performance of each class. **Accuracy**, **precision**, **recall** and **F-score** were computed for each class and mis-classified images studied to help choose appropriate augmentation transformations and normalization steps. Following conclusions were made:
 
 1. There were some classes that had a very small number of training images compared to others. Rather unintuitively, precision and recall numbers were not exactly correlated to this fact. Baring a few, most of the classes of signs with low sample sizes did fairly well on our benchmarking numbers. Of course, this fact can not be generalized and depends heavily on the distribution and variation in the images in our three sets.
 2. Analyzing precision and recall helped decide on grayscale conversion as a normalization step. The following plot shows a plot of our benchmarking numbers for all the classes. 
-![Class-wise performance](./doc-images/classwise-final.png) 
+![Class-wise performance](./doc-images/classwise-old.png) 
 2. Clearly `16` stands out. Analysis of the mis-classified images showed that this sign comes in 2 variants - one of which does not have a red border. Further analysis of random images from the training showed that this variety is not very well represented in the training set and this could be a cause for the errors. While the correct step here would have been to shuffle the three datasets well, we decided to convert the images to grayscale. This improved the performance of our model on this sign (although not overall because the dataset has very low number of such signs). The final class-wise performance is shown in the next section.
 
 This analysis also helped us discover more reasons for mis-classification like partial occlusion, over-exposure, bad resolution - the examples of which are far too many to show here. Many of these can potentially be solved by better normalization and data augmentation.
@@ -205,8 +230,7 @@ To simulate field testing, we tested our model on 8 new traffic sign images gath
 
 ![Field images and their labels](./doc-images/field-images.png)
 
-Of course, the images were extremely high resolution when downloaded. They downsampled to 32x32 pixels after a bit of gaussian blurring. Most of the images are fairly easy. One of the images has a sign not among the training set. Another has both a Yield and a Roundabout sign. Such signs often occur together and an incorrect segmentation can give such inputs to our network.   
-
+Of course, the images were extremely high resolution when downloaded. They downsampled to 32x32 pixels after a bit of gaussian blurring. About a half of our images are fairly easy ones and rest are tricky. One of the images has a sign not among the training set. Another has both a Yield and a Roundabout sign. Such signs often occur together and an incorrect segmentation can give such inputs to our network.   
 Following is the summary of our predictions.
 ![Field images and their labels](./doc-images/field-images-pred.png)
 
@@ -223,7 +247,7 @@ Here are the results of the prediction:
 | Roundabout mandatory  | Roundabout mandatory                          |
 | Double curve          | No passing for vehicles over 3.5 metric tons  |
 
-The model was able to correctly guess 4 of the 8 traffic signs, which gives an accuracy of 50%. It clearly did not do well on any of our tricky signs. The double curve shown is a right double curve and from a random look at the training set, there appear to more left double curve images. This issue could have easily be solved via data augmentation via horizontal flipping. In the image with two signs in it, the model failed to detect either of them.  
+The model was able to correctly guess 4 of the 8 traffic signs, which gives an accuracy of 50%. It clearly did not do well on any of our tricky signs. The "Double Curve" image shows a right double curve and from a random look at the training set, there are probably more left double curve images there. This issue could have easily be solved via data augmentation via horizontal flipping - something we initially decided against. In the image with two signs in it, the model failed to detect either of them.  
 
 Since the number of images taken here is so small, analysis of precision and recall is unlikely to be useful. We therefore chose to perform this analysis earlier on our validation dataset. Instead, we try and plot the classes with the top 3 soft-max probabilities for each of the classes. They look like the following:
 
