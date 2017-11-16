@@ -193,17 +193,21 @@ Since the number of iterations in the model development we large, we present onl
 1. The starting LeNet-5 model from the [LeNet MNIST lab](https://github.com/udacity/CarND-LeNet-Lab) gave us an accuracy of around 87%. Changing the number of epochs, learning rates and batch sizes did not significantly increase the accuracy. 
 2. Implemented data normalization and conversion to grayscale. This improved the validation accuracy to over 90%. Most of the gains were due to normalization but it was decided to stick with the grayscale conversion anyway. More about this aspect in a later section.
 3. The model mostly overfit the training set. Training set accuracy has always been around 98% to 100%. To help solve this, dropout layers were added to all the fully-connected layers. L2 regularization was also added and tuned. This helped the difference to reduce and it improved the validation accuracy to around 92%. 
-4. Another fully-connected layer was added after the convolution layers. This model is the second one mentioned in the [Model Architectures section](#the-model-architecture). With some hyperparameter tuning, it was this architecture helped us achieve the target accuracy of 93% and occasionally even high as 95%. Further steps in improving the model/architecture are mostly with the intent of learning.
+4. Another fully-connected layer was added after the convolution layers. This model is the second one mentioned in the [Model Architectures section](#the-model-architecture). With some hyperparameter tuning, it was this architecture that helped us achieve the target accuracy of 93% and occasionally even high as 95%. Further steps in improving the model/architecture are mostly with the intent of learning.
 5. Data augmentation pipeline was implemented. Number of layers and filters were tuned further to try and reduce the overfit with additional nodes. This helped achieve a target and take the validation accuracy to well beyond 93%.   
 6. The multi-scale LeNet architecture was implemented by connecting the first convolution layer to the fully-connected layer. After tuning the number of filters in each layer and nodes in the classification layers, the final performance numbers were achieved. Removing L2 regularization gave better validation accuracy numbers and hence it was disabled.      
 
 To help us during our iterations, we computed the performance of each class. **Accuracy**, **precision**, **recall** and **F-score** were computed for each class and mis-classified images studied to help choose appropriate augmentation transformations and normalization steps. Following conclusions were made:
 
 1. There were some classes that had a very small number of training images compared to others. Rather unintuitively, precision and recall numbers were not exactly correlated to this fact. Baring a few, most of the classes of signs with low sample sizes did fairly well on our benchmarking numbers. Of course, this fact can not be generalized and depends heavily on the distribution and variation in the images in our three sets.
-2. Analyzing precision and recall helped decide on grayscale conversion as a normalization step. The following plot shows a plot of our benchmarking numbers for all the classes. 
-![Class-wise performance](./doc-images/classwise-old.png) 
+2. Analyzing precision and recall helped decide on grayscale conversion as a normalization step. The following plot shows a plot of our benchmarking numbers for all the classes.
+ 
+![Class-wise performance](./doc-images/classwise-old.png)
+ 
 2. Clearly `16` stands out. Analysis of the mis-classified images showed that this sign comes in 2 variants - one of which does not have a red border. These variants are shown in the figure below. 
+
 ![Class 16](./doc-images/16.png) 
+
 Further analysis of random images from the training indicated that this variety is probably not very well represented in the training set and this could be a cause for the errors. While the correct step here would have been to shuffle the three datasets well, we decided to convert the images to grayscale. This improved the performance of our model on this sign (although not overall because the dataset has very low number of such signs). The final class-wise performance is shown in the next section.
 
 
@@ -258,7 +262,16 @@ Since the number of images taken here is so small, analysis of precision and rec
 
 For the images that we have chosen, the model is quite certain of the predictions it made - even they are incorrect. For the image with two signs on it, neither of the signs come close in magnitude to the (incorrect) prediction that it made. 
 
-### (Optional) Visualizing the Neural Network (See Step 4 of the Ipython notebook for more details)
-####1. Discuss the visual output of your trained network's feature maps. What characteristics did the neural network use to make classifications?
+### Visualizing the Neural Network
 
+As a last step of the project, we try visualize the activations of our model for two images. One of them is a clear true negative - image of a mountain and other one is a an image that our model classified well. The images are shown below.
 
+![Images for visualization](./doc-images/act-images.png)
+
+The first layer activations for the true negative are as follows. Activations are noisy or dark with no clear features of a sign visible. 
+
+![Images for visualization](./doc-images/act-image1.png) 
+
+The story, however, changes for the second image. The first convolution has chosen edges that are strong visible in the activations. These edges are then selected later by a fully-connected network for perform classification.
+
+![Images for visualization](./doc-images/act-image2.png) 
