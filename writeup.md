@@ -30,7 +30,7 @@ The dataset exploration was done primarily with `numpy`. `pandas` was used to re
 
 ##### Visualization of the dataset.
 
-Each image is a 32x32x3 RGB array with integer values in the range `[0 255]'. We plot a random images of a few classes to see how they look like. 
+Each image is a `32x32x3` RGB array with integer values in the range `[0 255]`. We plot a random images of a few classes to see how they look like. 
 
 ![Sample Images](doc-images/datavis.png)
 
@@ -53,7 +53,7 @@ The result are as expected. The variation in the brightnesses of has been reduce
 ### Data augmentation
 
 There are two reasons for considering data augmentation for this model:
-1. The dataset is highly unbalances. In some cases, there are only a little more than 200 images per class. We could therefore augment those under-represented classes with generated data.
+1. The dataset is highly unbalanced. In some cases, there are only a little more than 200 images per class. We could therefore augment those under-represented classes with generated data.
 2. As we shall see later, our models mostly overfit the data. In such cases, there is almost always room for more variation in the training set. We bring about this variation by generating jittered data.
 
 We can choose among a very large set of transformations to create an augmented dataset. We however, focus on transformations that are realistic for our case. For example, flipping will not help as it completely changes most of the traffic signs. Tranformations like warp will not occur in practice and neither will shear (expect probably as a rolling shutter artifact at high speeds). Brightness changes, while very possible, get normalized away in our pre-processing step. Any color-based transformations are lost in our conversion to grayscale. These transformations are unlikely to improve the field performance of our model.  
@@ -172,10 +172,12 @@ Since the number of iterations we large, we present only a few important changes
 
 To help us during our iterations, we computed the performance of each class. Accuracy, precision, recall and F-score were computed for each class and mis-classified images studied to help choose appropriate augmentation transformations and normalization steps. Following conclusions were made:
 
-1. There were some classes that had a very small number of training images compared to others. Rather unintuitively, precision and recall numbers were not exactly correlated to this fact. Baring a few, most of the classes of signs with low sample sizes did fairly well on our benchmarking numbers. Of course, this fact can not be generalized and depends heavily on the distribution and variation in the images in our three sets.
-2. Analyzing precision and recall helped decide on grayscale conversion as a normalization step. The following plot shows a plot of our benchmarking numbers for all the classes. Clearly `16` stands out. Analysis of the mis-classified images showed that this sign comes in 2 variants - one of which does not have a red border. Further analysis of random images from the training showed that this variety is not very well represented in the training set and this could be a cause for the errors. While the correct step here would have been to shuffle the three datasets well, we decided to convert the images to grayscale. This improved the performance of our model on this sign (although not overall because the dataset has very low number of such signs). The final class-wise performance is shown in the next section.
+1. There were some classes that had a very small number of training images compared to others. Rather unintuitively, **precision** and **recall** numbers were not exactly correlated to this fact. Baring a few, most of the classes of signs with low sample sizes did fairly well on our benchmarking numbers. Of course, this fact can not be generalized and depends heavily on the distribution and variation in the images in our three sets.
+2. Analyzing precision and recall helped decide on grayscale conversion as a normalization step. The following plot shows a plot of our benchmarking numbers for all the classes. 
+![Class-wise performance](./doc-images/classwise-final.png) 
+2. Clearly `16` stands out. Analysis of the mis-classified images showed that this sign comes in 2 variants - one of which does not have a red border. Further analysis of random images from the training showed that this variety is not very well represented in the training set and this could be a cause for the errors. While the correct step here would have been to shuffle the three datasets well, we decided to convert the images to grayscale. This improved the performance of our model on this sign (although not overall because the dataset has very low number of such signs). The final class-wise performance is shown in the next section.
 
-This analysis also helped us discover more reasons for mis-classification like partial occulsion, over-exposure, bad resolution - the examples of which are far too many to show here. Many of these can potentially be solved by better normalization and data augmentation.
+This analysis also helped us discover more reasons for mis-classification like partial occlusion, over-exposure, bad resolution - the examples of which are far too many to show here. Many of these can potentially be solved by better normalization and data augmentation.
 
 A similar analysis could also have been done with a confusion matrix.
 
@@ -188,55 +190,44 @@ The final model results were as follows:
 
 It is not surprising that the accuracy with test set is less than that of the validation set. The model was being continuously tuned with a goal of reducing the validation error. This causes the validation set to indirectly creep into our model training leading to a high accuracy.
 
-Overall, the model still overfits the dataset while surpassing our target on validation accuracy. Later sections address how the performance could be improved. 
-
-The class wise performance of our model on the validation set is shown below.
+Overall, the model still overfits the dataset while surpassing our target on validation accuracy. This is primarily because the model was tune to get the maximum possible validation accuracy. With significant augmentation (and hence a significantly higher training time) this overfit could be reduced and the performances improved.
  
 
+The class wise performance of our model on the validation set is shown below.
+![Class-wise performance](./doc-images/classwise-final.png) 
 
 
-### Test a Model on New Images
+### Field testing on new images
 
-##### Choose five German traffic signs found on the web and provide them in the report. For each image, discuss what quality or qualities might be difficult to classify.
+To simulate field testing, we tested our model on 8 new traffic sign images gathered from the internet. The images and their labels are shown below.
 
-Here are five German traffic signs that I found on the web:
+![Field images and their labels](./doc-images/field-images.png)
 
-![alt text][image4] ![alt text][image5] ![alt text][image6] 
-![alt text][image7] ![alt text][image8]
+Of course, the images were extremely high resolution when downloaded. They downsampled to 32x32 pixels after a bit of gaussian blurring. Most of the images are fairly easy. One of the images has a sign not among the training set. Another has both a Yield and a Roundabout sign. Such signs often occur together and an incorrect segmentation can give such inputs to our network.   
 
-The first image might be difficult to classify because ...
-
-##### Discuss the model's predictions on these new traffic signs and compare the results to predicting on the test set. At a minimum, discuss what the predictions were, the accuracy on these new predictions, and compare the accuracy to the accuracy on the test set (OPTIONAL: Discuss the results in more detail as described in the "Stand Out Suggestions" part of the rubric).
+Following is the summary of our predictions.
+![Field images and their labels](./doc-images/field-images-pred.png)
 
 Here are the results of the prediction:
 
 | Image			        |     Prediction	        					| 
 |:---------------------:|:---------------------------------------------:| 
-| Stop Sign      		| Stop sign   									| 
-| U-turn     			| U-turn 										|
-| Yield					| Yield											|
-| 100 km/h	      		| Bumpy Road					 				|
-| Slippery Road			| Slippery Road      							|
+| Priority road         | Priority road                                 | 
+| Keep right            | Keep right									|
+| (unlabled)            | Speed limit (50km/h)							|
+| Yield or Roundabout   | Speed limit (30km/h)			 				|
+| Children crossing     | Children crossing    							|
+| Right of way at the next intersection| Right of way at the next intersection |
+| Roundabout mandatory  | Roundabout mandatory                          |
+| Double curve          | No passing for vehicles over 3.5 metric tons  |
 
+The model was able to correctly guess 4 of the 8 traffic signs, which gives an accuracy of 50%. It clearly did not do well on any of our tricky signs. The double curve shown is a right double curve and from a random look at the training set, there appear to more left double curve images. This issue could have easily be solved via data augmentation via horizontal flipping. In the image with two signs in it, the model failed to detect either of them.  
 
-The model was able to correctly guess 4 of the 5 traffic signs, which gives an accuracy of 80%. This compares favorably to the accuracy on the test set of ...
+Since the number of images taken here is so small, analysis of precision and recall is unlikely to be useful. We therefore chose to perform this analysis earlier on our validation dataset. Instead, we try and plot the classes with the top 3 soft-max probabilities for each of the classes. They look like the following:
 
-##### Describe how certain the model is when predicting on each of the five new images by looking at the softmax probabilities for each prediction. Provide the top 5 softmax probabilities for each image along with the sign type of each probability. (OPTIONAL: as described in the "Stand Out Suggestions" part of the rubric, visualizations can also be provided such as bar charts)
+![Field images and their labels](./doc-images/field-images-softmax.png)
 
-The code for making predictions on my final model is located in the 11th cell of the Ipython notebook.
-
-For the first image, the model is relatively sure that this is a stop sign (probability of 0.6), and the image does contain a stop sign. The top five soft max probabilities were
-
-| Probability         	|     Prediction	        					| 
-|:---------------------:|:---------------------------------------------:| 
-| .60         			| Stop sign   									| 
-| .20     				| U-turn 										|
-| .05					| Yield											|
-| .04	      			| Bumpy Road					 				|
-| .01				    | Slippery Road      							|
-
-
-For the second image ... 
+For the images that we have chosen, the model is quite certain of the predictions it made - even they are incorrect. For the image with two signs on it, neither of the signs come close in magnitude to the (incorrect) prediction that it made. 
 
 ### (Optional) Visualizing the Neural Network (See Step 4 of the Ipython notebook for more details)
 ####1. Discuss the visual output of your trained network's feature maps. What characteristics did the neural network use to make classifications?
