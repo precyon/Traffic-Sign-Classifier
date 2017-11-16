@@ -177,6 +177,7 @@ To help us during our iterations, we computed the performance of each class. Acc
 
 This analysis also helped us discover more reasons for mis-classification like partial occulsion, over-exposure, bad resolution - the examples of which are far too many to show here. Many of these can potentially be solved by better normalization and data augmentation.
 
+A similar analysis could also have been done with a confusion matrix.
 
 ### Model performance
 
