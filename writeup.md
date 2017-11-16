@@ -202,9 +202,12 @@ To help us during our iterations, we computed the performance of each class. **A
 1. There were some classes that had a very small number of training images compared to others. Rather unintuitively, precision and recall numbers were not exactly correlated to this fact. Baring a few, most of the classes of signs with low sample sizes did fairly well on our benchmarking numbers. Of course, this fact can not be generalized and depends heavily on the distribution and variation in the images in our three sets.
 2. Analyzing precision and recall helped decide on grayscale conversion as a normalization step. The following plot shows a plot of our benchmarking numbers for all the classes. 
 ![Class-wise performance](./doc-images/classwise-old.png) 
-2. Clearly `16` stands out. Analysis of the mis-classified images showed that this sign comes in 2 variants - one of which does not have a red border. Further analysis of random images from the training showed that this variety is not very well represented in the training set and this could be a cause for the errors. While the correct step here would have been to shuffle the three datasets well, we decided to convert the images to grayscale. This improved the performance of our model on this sign (although not overall because the dataset has very low number of such signs). The final class-wise performance is shown in the next section.
+2. Clearly `16` stands out. Analysis of the mis-classified images showed that this sign comes in 2 variants - one of which does not have a red border. These variants are shown in the figure below. 
+![Class 16](./doc-images/16.png) 
+Further analysis of random images from the training indicated that this variety is probably not very well represented in the training set and this could be a cause for the errors. While the correct step here would have been to shuffle the three datasets well, we decided to convert the images to grayscale. This improved the performance of our model on this sign (although not overall because the dataset has very low number of such signs). The final class-wise performance is shown in the next section.
 
-This analysis also helped us discover more reasons for mis-classification like partial occlusion, over-exposure, bad resolution - the examples of which are far too many to show here. Many of these can potentially be solved by better normalization and data augmentation.
+
+This analysis also helped us discover more reasons for mis-classification like partial occlusion, over-exposure, bad resolution - the examples of which are far too many to show here. Classes `0`, `41`, `27` were among these. Some of these issues could be addressed with better normalization and data augmentation.  
 
 A similar analysis could also have been done by plotting the confusion matrix.
 
