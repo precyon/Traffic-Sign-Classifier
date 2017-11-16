@@ -1,9 +1,5 @@
-# **Traffic Sign Recognition** 
+# **Building a Traffic Sign Classifier** 
 
-## Writeup Template
-
-
-**Build a Traffic Sign Recognition Project**
 
 The goals / steps of this project are the following:
 * Load the data set (see below for links to the project data set)
@@ -11,16 +7,16 @@ The goals / steps of this project are the following:
 * Design, train and test a model architecture
 * Use the model to make predictions on new images
 * Analyze the softmax probabilities of the new images
-* Summarize the results with a written report
  
 ### Project files
 
-The project page is on [Github](https://github.com/pvishal-carnd/Traffic-Sign-Classifier). This writeup can at [writeup.md](writeup.md) and the Jupyter notebook, that has all the code can be accessed at [Traffic_Sign_Classifier.ipynb](Traffic_Sign_Classifier.ipynb). 
+The project page is on [Github](https://github.com/pvishal-carnd/Traffic-Sign-Classifier). This writeup can at [writeup.md](writeup.md) and the Jupyter notebook, that has all the code can be accessed at [Traffic_Sign_Classifier.ipynb](Traffic_Sign_Classifier.ipynb) and as an html file, [Traffic_Sign_Classifier.html](Traffic_Sign_Classifier.html) 
+
+The dataset that was used is the [German Traffic Sign Dataset](http://benchmark.ini.rub.de/?section=gtsrb&subsection=dataset).
 
 ### Data Set Summary & Exploration
 ---
-The dataset exploration was done primarily with `numpy`. `pandas` was used to read in the `csv` file with sign descriptions. The training, validation and test set has already been provided. The following list shows a summary.   
-
+The dataset exploration was done primarily with `numpy`. `pandas` was only used to read in the `csv` file with sign descriptions. The training, validation and test set has already been provided. The following list shows a summary.   
 
 * The size of training set is `34799`
 * The size of the validation set is `4410`
@@ -42,7 +38,7 @@ From the shapes of each of the three distributions,  the validation and the test
 
 ### Pre-processing
 
-As a first step of the preprocessing pipeline, the images were converted to grayscale. This step is not strictly required but we noticed small improvement in the overall validation set performance with this conversion.   In their [paper](http://yann.lecun.com/exdb/publis/pdf/sermanet-ijcnn-11.pdf), Pierre Sermanet and Yann LeCun also report a marginal improvement with grayscale conversions. Having said that, certain classes of sign did significantly better after grayscale conversion. We will address this issue in a later section when we analyze the model performance.
+As a first step of the preprocessing pipeline, the images were converted to grayscale. This step is not strictly required but we noticed only small improvements in the overall validation set performance with this conversion.   In their [paper](http://yann.lecun.com/exdb/publis/pdf/sermanet-ijcnn-11.pdf), Pierre Sermanet and Yann LeCun also report a marginal improvement with grayscale conversions. Having said that, certain individual classes of signs did significantly better after grayscale conversion. We will address this issue in a later section when we analyze the model performance.
 
 After grayscaling, the images were normalized. We did this by linearly mapping all the pixel values to lie between `0` and `1`. Apart from helping the learning by keeping the means small and the cost function well distributed along all axes, this normalization steps also helps make the algorithm invariant to brightness changes. The image histograms become flatter and this helps bring up faint features. However, this method fails to work under cases where parts of the image are overexposed (perhaps due to the sky in the background). Local adaptive histogram equalization, local normalization or applying a non-linear transformation like gamma correction can potentially help such cases. We, nevertheless, continued with our simple min-max normalization scheme and the results are as follows:   
 
@@ -56,9 +52,9 @@ There are two reasons for considering data augmentation for this model:
 1. The dataset is highly unbalanced. In some cases, there are only a little more than 200 images per class. We could therefore augment those under-represented classes with generated data.
 2. As we shall see later, our models mostly overfit the data. In such cases, there is almost always room for more variation in the training set. We bring about this variation by generating jittered data.
 
-We can choose among a very large set of transformations to create an augmented dataset. We however, focus on transformations that are realistic for our case. For example, flipping will not help as it completely changes most of the traffic signs. Tranformations like warp will not occur in practice and neither will shear (expect probably as a rolling shutter artifact at high speeds). Brightness changes, while very possible, get normalized away in our pre-processing step. Any color-based transformations are lost in our conversion to grayscale. These transformations are unlikely to improve the field performance of our model.  
+We can choose among a very large set of transformations to create an augmented dataset. We however, focus on transformations that are realistic for our case. For example, flipping may not help as it completely changes most of the traffic signs. Transformations like warp will not occur in practice and neither will shear (except probably as a rolling shutter artifact at high speeds). Brightness changes, while very possible, get normalized away in our pre-processing step. Any color-based transformations are lost in our conversion to grayscale. Therefore, these transformations are unlikely to improve the field performance of our model.  
 
-We therefore, limit ourselves to the following transformations.  
+We therefore, only limit ourselves to the following transformations.  
 - Translation
 - Rotation
 - Constrast 
@@ -69,7 +65,7 @@ We therefore, limit ourselves to the following transformations.
 
 While there is a considerable scope for data augmentation in this project, we mostly limit ourselves to creating just enough augmentation for balancing the dataset. This has been done considering the limitation on the training resources and the validation accuracy targets that we have. Therefore, we only augment images in the class so that each one of them has at least 1000 or so image.
 
-We use a library `imgaug` for this task. This library allows us to easily create a random augmentation pipeline and apply it to large image sets. It is also easily available on `PyPi` and can be simply installed with 
+We use a library `imgaug` for this task. This library allows us to easily create a random augmentation pipeline and apply it to image stacks. It is also easily available on `PyPi` and can be simply installed with 
 
 ```
 pip install imgaug
@@ -142,9 +138,9 @@ Two models deserve attention here:
 | FC2       | Fully connected       | Fully connected layer, 43 units               |
 
 
-Our model has 5 layers: 2 convolutional layers for feature extraction and 3 fully connected layer for classification. The architecture is based on the LeNet-5 model from the [LeNet MNIST lab](https://github.com/udacity/CarND-LeNet-Lab). As in most convolutional neural network models, the number of filters increase in the deeper convolutional layers and the image sizes decrease. Unlike the LeNet-5 model above, we use same padding instead of valid padding. In case of valid padding, features around the edges get less importance. This could reduce performance as our images are not guaranteed to be centered well. It could probably be more beneficial to keep the sizes same after convolutions and use max-pooling layers for size reductions.
+Our model has 5 layers: 2 convolution layers for feature extraction and 3 fully connected layer for classification. The architecture is based on the LeNet-5 model from the [LeNet MNIST lab](https://github.com/udacity/CarND-LeNet-Lab). As in most convolution neural network models, the number of filters increase in the deeper convolutional layers and the image sizes decrease. Unlike the LeNet-5 model above, we use same padding instead of valid padding. In case of valid padding, features around the edges get less importance. This could reduce performance as our images are not guaranteed to be centered well. It could probably be more beneficial to keep the sizes same after convolutions and use max-pooling layers for size reductions.
  
-Another highlight of the model is that is it uses multi-scale features for classification as proposed in this [paper](http://yann.lecun.com/exdb/publis/pdf/sermanet-ijcnn-11.pdf) by Pierre Sermanet and Yann LeCunn. This is achieved by feeding in the output of both the convolutional layers to the classifier. It is easy to see this in the architecture diagram above - the output of `CONV1` is also max-pooled and fed into the fully-connected `flatten` layer. An addition max-pooling is done so that the features of the `CONV1` layer are weighed in similarly to that of `CONV2`.
+Another highlight of the model is that is it uses multiscale features for classification as proposed in this [paper](http://yann.lecun.com/exdb/publis/pdf/sermanet-ijcnn-11.pdf) by Pierre Sermanet and Yann LeCunn. This is achieved by feeding in the output of both the convolution layers to the classifier. It is easy to see this in the architecture diagram above - the output of `CONV1` is also max-pooled and fed into the fully-connected `flatten` layer. An addition max-pooling is done so that the features of the `CONV1` layer are weighed in similarly to that of `CONV2`.
 
 All layer activations in this model were performed with a ReLU. 
 
@@ -179,46 +175,46 @@ keep_prob1    = 0.4
 keep_prob2    = 0.4
 ```
 
-The model was trained using the Adam optimizer. Among the other optimizers that were tries, it clearly performed better than the Stocastic Gradient Descent and very often better than RMSProp
+The model was trained using the Adam optimizer. Among the other optimizers that were tried, it clearly performed better than the Stocastic Gradient Descent and very often better than RMSProp
 
 #### Regularization
 Adding regularization was one of the first modifications we made to the default LeNet-5 model. A later section describes our iterations on the regularization parameters.
 - Dropout. We added dropout layers to all the fully-connected layers in the model. Dropout is not usually used in the convolutional layers and we mostly stuck to this using our iterations. 
-- L2-regularization. Again, L2-regularization was added only to the weights in the fully-connected layers. The loss function from the prediction errors was augmented with L2-norm of the layer weights, scaled with a tunable hyperparameter. While L2-regularization gave us significant benefits in reducing overfitting initially, we set it to zero in favour of dropout as our validation accuracy approached closer to the training accuracy.    
+- L2-regularization. Again, L2-regularization was added only to the weights in the fully-connected layers. The loss function from the prediction errors was augmented with L2-norm of the layer weights, scaled with a tunable hyperparameter. While L2-regularization gave us significant benefits in reducing overfitting initially, we set it to zero in favor of dropout as our validation accuracy approached closer to the training accuracy.    
 
 #### Development history
 
-Since the number of iterations in the model development we large, we present only a few important changes to the model and the hyper-parameters that we took towards our target validation accuracy 
+Since the number of iterations in the model development were large, we present only a few important changes to the model and the hyper-parameters that we took towards our target validation accuracy 
 
 1. The starting LeNet-5 model from the [LeNet MNIST lab](https://github.com/udacity/CarND-LeNet-Lab) gave us an accuracy of around 87%. Changing the number of epochs, learning rates and batch sizes did not significantly increase the accuracy. 
 2. Implemented data normalization and conversion to grayscale. This improved the validation accuracy to over 90%. Most of the gains were due to normalization but it was decided to stick with the grayscale conversion anyway. More about this aspect in a later section.
 3. The model mostly overfit the training set. Training set accuracy has always been around 98% to 100%. To help solve this, dropout layers were added to all the fully-connected layers. L2 regularization was also added and tuned. This helped the difference to reduce and it improved the validation accuracy to around 92%. 
-4. Another fully-connected layer was added after the convolution layers. This model is the second one mentioned in the [Model Architectures section](#the-model-architecture). With some hyperparameter tuning, it was this architecture that helped us achieve the target accuracy of 93% and occasionally even high as 95%. Further steps in improving the model/architecture are mostly with the intent of learning.
+4. Another fully-connected layer was added after the convolution layers. This model is the second one mentioned in the [Model Architectures section](#the-model-architecture). With some hyperparameter tuning, it was this architecture that helped us achieve the target accuracy of 93% and occasionally even high as 95%. Further improvement in the model/architecture was mostly an academic pursuit. 
 5. Data augmentation pipeline was implemented. Number of layers and filters were tuned further to try and reduce the overfit with additional nodes. This helped achieve a target and take the validation accuracy to well beyond 93%.   
-6. The multi-scale LeNet architecture was implemented by connecting the first convolution layer to the fully-connected layer. After tuning the number of filters in each layer and nodes in the classification layers, the final performance numbers were achieved. Removing L2 regularization gave better validation accuracy numbers and hence it was disabled.      
+6. The multi-scale LeNet architecture was implemented by connecting the first convolution layer to the fully-connected layer. After tuning the number of filters in each layer and nodes in the classification layers, the final performance numbers were achieved. Removing L2 regularization gave better validation accuracy numbers and hence it was disabled. This pushed our validation set performance to be consistently greater than 95.5%
 
-To help us during our iterations, we computed the performance of each class. **Accuracy**, **precision**, **recall** and **F-score** were computed for each class and mis-classified images studied to help choose appropriate augmentation transformations and normalization steps. Following conclusions were made:
+To help us during our iterations, we computed the performance of each class. **Accuracy**, **precision**, **recall** and **F-score** were computed for each class and misclassified images studied to help choose appropriate augmentation transformations and normalization steps. Following conclusions were made:
 
 1. There were some classes that had a very small number of training images compared to others. Rather unintuitively, precision and recall numbers were not exactly correlated to this fact. Baring a few, most of the classes of signs with low sample sizes did fairly well on our benchmarking numbers. Of course, this fact can not be generalized and depends heavily on the distribution and variation in the images in our three sets.
 2. Analyzing precision and recall helped decide on grayscale conversion as a normalization step. The following plot shows a plot of our benchmarking numbers for all the classes.
  
 ![Class-wise performance](./doc-images/classwise-old.png)
  
-2. Clearly `16` stands out. Analysis of the mis-classified images showed that this sign comes in 2 variants - one of which does not have a red border. These variants are shown in the figure below. 
+2. Clearly `16` stands out. Analysis of the misclassified images showed that this sign comes in 2 variants - one of which does not have a red border. These variants are shown in the figure below. 
 
 ![Class 16](./doc-images/16.png) 
 
-Further analysis of random images from the training indicated that this variety is probably not very well represented in the training set and this could be a cause for the errors. While the correct step here would have been to shuffle the three datasets well, we decided to convert the images to grayscale. This improved the performance of our model on this sign (although not overall because the dataset has very low number of such signs). The final class-wise performance is shown in the next section.
+Further analysis of random images from the training sete indicated that this variety is probably not very well represented in the training and this could be a cause for the errors. While the correct step here would have been to shuffle the three datasets well, we decided to convert the images to grayscale. This improved the performance of our model on this sign (although not overall because the dataset has very low number of such signs). The final class-wise performance is shown in the next section.
 
 
-This analysis also helped us discover more reasons for mis-classification like partial occlusion, over-exposure, bad resolution - the examples of which are far too many to show here. Classes `0`, `41`, `27` were among these. Some of these issues could be addressed with better normalization and data augmentation.  
+This analysis also helped us discover more reasons for misclassification like partial occlusion, over-exposure, bad resolution - the examples of which are far too many to show here. Classes `0`, `41`, `27` were among these. Some of these issues could be addressed with better normalization and data augmentation.  
 
 A similar analysis could also have been done by plotting the confusion matrix.
 
 ### Model performance
 
 The final model results were as follows:
-* Training set accuracy of `100%`
+* Training set accuracy of `99.94%`
 * Validation set accuracy of `96.6%`
 * Test set accuracy of `94.1%`
 
