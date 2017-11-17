@@ -1,5 +1,4 @@
 # **Building a Traffic Sign Classifier** 
----
 
 ### Table of contents
 1. [The dataset and preprocessing](#the-dataset-and-preprocessing)
@@ -7,7 +6,7 @@
 	2. [Pre-processing](#pre-processing)
 	3. [Data augmentation](#data-augmentation)
 2. [The Model Architecture](#the-model-architecture)
-    1. [Training and hyperparameters](#Training-and-hyperparameters)
+    1. [Training and hyperparameters](#training-and-hyperparameters)
     2. [Regularization](#regularization)
 3. [Development history](#development-history)
 4. [Model performance and testing](#model-performance-and-testing)
