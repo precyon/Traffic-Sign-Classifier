@@ -1,7 +1,18 @@
 # **Building a Traffic Sign Classifier** 
+---
 
-
-Table of contents
+### Table of contents
+1. [The dataset and preprocessing](#the-dataset-and-preprocessing)
+	1. [Visualization of the dataset](#visualization-of-the-dataset)
+	2. [Pre-processing](#pre-processing)
+	3. [Data augmentation](#data-augmentation)
+2. [The Model Architecture](#the-model-architecture)
+    1. [Training and hyperparameters](#Training-and-hyperparameters)
+    2. [Regularization](#regularization)
+3. [Development history](#development-history)
+4. [Model performance and testing](#model-performance-and-testing)
+	1. [Field testing on new images](#field-testing-on-new-images)
+3. [Visualizing the activations](#visualizing-the-activations)
 
 The goals / steps of this project are the following:
 * Load the data set (see below for links to the project data set)
@@ -14,11 +25,10 @@ The goals / steps of this project are the following:
 
 The project page is on [Github](https://github.com/pvishal-carnd/Traffic-Sign-Classifier). This writeup can at [writeup.md](writeup.md) and the Jupyter notebook, that has all the code can be accessed at [Traffic_Sign_Classifier.ipynb](Traffic_Sign_Classifier.ipynb) and as an html file, [Traffic_Sign_Classifier.html](Traffic_Sign_Classifier.html) 
 
-The dataset that was used is the [German Traffic Sign Dataset](http://benchmark.ini.rub.de/?section=gtsrb&subsection=dataset).
 
-### Data Set Summary & Exploration
+### The dataset and preprocessing
 ---
-The dataset exploration was done primarily with `numpy`. `pandas` was only used to read in the `csv` file with sign descriptions. The training, validation and test set has already been provided. The following list shows a summary.   
+The dataset that was used is the [German Traffic Sign Dataset](http://benchmark.ini.rub.de/?section=gtsrb&subsection=dataset). The dataset exploration was done primarily with `numpy`. `pandas` was only used to read in the `csv` file with sign descriptions. The training, validation and test set has already been provided. The following list shows a summary.   
 
 * The size of training set is `34799`
 * The size of the validation set is `4410`
@@ -26,7 +36,7 @@ The dataset exploration was done primarily with `numpy`. `pandas` was only used 
 * The shape of a traffic sign image is `32x32`
 * The number of unique classes/labels in the data set is `43`
 
-##### Visualization of the dataset.
+#### Visualization of the dataset.
 
 Each image is a `32x32x3` RGB array with integer values in the range `[0 255]`. We plot a random images of a few classes to see how they look like. The first thing that strikes us is the variation is the brightness of the images.  
 
@@ -38,7 +48,7 @@ Next, we plot the histogram of the number of images for each class.
 
 From the shapes of each of the three distributions,  the validation and the test datasets, at least at the outset do seem to be drawn from the same distribution. However, the dataset is unbalanced. Certain classes are significantly under-represented with respect to the number of available samples in the training set. We will keep an eye out for these classes when we analyze the prediction model performance at a later stage.  
 
-### Pre-processing
+#### Pre-processing
 
 As a first step of the preprocessing pipeline, the images were converted to grayscale. This step is not strictly required but we noticed only small improvements in the overall validation set performance with this conversion.   In their [paper](http://yann.lecun.com/exdb/publis/pdf/sermanet-ijcnn-11.pdf), Pierre Sermanet and Yann LeCun also report a marginal improvement with grayscale conversions. Having said that, certain individual classes of signs did significantly better after grayscale conversion. We will address this issue in a later section when we analyze the model performance.
 
@@ -48,7 +58,7 @@ After grayscaling, the images were normalized. We did this by linearly mapping a
 
 The result are as expected. The variation in the brightnesses of has been reduced and the darker features have been brought up. Also as expected, our simplistic linear normalization scheme has a very little effect on signs that have sky in the background.   
 
-### Data augmentation
+#### Data augmentation
 
 There are two reasons for considering data augmentation for this model:
 1. The dataset is highly unbalanced. In some cases, there are only a little more than 200 images per class. We could therefore augment those under-represented classes with generated data.
@@ -165,7 +175,7 @@ All layer activations in this model were performed with a ReLU.
  
 All layer activations were performed with a ReLU. 
 
-### Training and hyperparameters
+#### Training and hyperparameters
 
 Our final choice of training hyperparameters is as follows:
 ```
@@ -181,10 +191,11 @@ The model was trained using the Adam optimizer. Among the other optimizers that 
 
 #### Regularization
 Adding regularization was one of the first modifications we made to the default LeNet-5 model. A later section describes our iterations on the regularization parameters.
-- Dropout. We added dropout layers to all the fully-connected layers in the model. Dropout is not usually used in the convolutional layers and we mostly stuck to this using our iterations. 
-- L2-regularization. Again, L2-regularization was added only to the weights in the fully-connected layers. The loss function from the prediction errors was augmented with L2-norm of the layer weights, scaled with a tunable hyperparameter. While L2-regularization gave us significant benefits in reducing overfitting initially, we set it to zero in favor of dropout as our validation accuracy approached closer to the training accuracy.    
+- **Dropout**: We added dropout layers to all the fully-connected layers in the model. Dropout is not usually used in the convolutional layers and we mostly stuck to this using our iterations. 
+- **L2-regularization**: Again, L2-regularization was added only to the weights in the fully-connected layers. The loss function from the prediction errors was augmented with L2-norm of the layer weights, scaled with a tunable hyperparameter. While L2-regularization gave us significant benefits in reducing overfitting initially, we set it to zero in favor of dropout as our validation accuracy approached closer to the training accuracy.    
 
 ### Development history
+---
 
 Since the number of iterations in the model development were large, we present only a few important changes to the model and the hyper-parameters that we took towards our target validation accuracy 
 
@@ -261,7 +272,7 @@ Since the number of images taken here is so small, analysis of precision and rec
 
 For the images that we have chosen, the model is quite certain of the predictions it made - even they are incorrect. For the image with two signs on it, neither of the signs come close in magnitude to the (incorrect) prediction that it made. 
 
-### Visualizing the Neural Network
+### Visualizing the activations
 ---
 
 As a last step of the project, we try visualize the activations of our model for two images. One of them is a clear true negative - image of a mountain and other one is a an image that our model classified well. The images are shown below.
